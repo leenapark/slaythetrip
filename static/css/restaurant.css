@@ -1,0 +1,21 @@
+video.hidden {
+  opacity: 0;
+  
+}
+
+video {
+  text-align: center;
+}
+
+button {
+  text-align: center;
+}
+
+.card.shadow {
+  text-align: center;
+}
+
+img {
+  position: absolute;
+  right: 30%;
+}

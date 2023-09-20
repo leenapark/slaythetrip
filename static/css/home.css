@@ -1,0 +1,18 @@
+body {
+  background-color: #4133BB ;
+}
+
+a {
+  top: 25%;
+  text-align: center;
+}
+
+.content {
+  left: 30%;
+  top: 20%;
+  position: absolute;
+}
+
+video#video {
+  width: 1000px;
+}

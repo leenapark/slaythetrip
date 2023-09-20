@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/restaurant.css">
+</head>
+<body>
+    <div class="container-xl pt-5">
+
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">제주도 맛집</h1>
+            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="bi bi-download"></i>&nbsp;&nbsp;저장하기</a>
+        </div>
+
+        <!-- Content Row -->
+        <!-- 맛집 평균 / 리뷰 -->
+        <div class="row">
+            <!-- Area Chart -->
+            <div class="col-xl-8 col-lg-7">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">음식점별 통계</h6>
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                aria-labelledby="dropdownMenuLink">
+                                <div class="dropdown-header">Dropdown Header:</div>
+                                <a class="dropdown-item" href="#">Action</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <!-- 차트1 -->
+                        <div style="position: relative; height: 100%;">
+                            <canvas id="star_rate"></canvas>
+                        </div>
+                        <!-- 차트2 -->
+                        <div style="display: flex; flex-wrap: wrap;">
+                            <div style="flex: 1;">
+                                <canvas id="review_num2"></canvas>
+                            </div>
+                            <div style="flex: 1;">
+                                <canvas id="review_num1"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <form action="" name="frm" class="frm" method="post">
+                                {% csrf_token %}
+                                <select id="place_select" onchange="handlePlaceSelection()" name="selectedPlace">
+                                    <option value="default">전체</option>
+                                    {% for ele in h_place %}
+                                    <option id="placeVal" value="{{ ele.place_name }}" >{{ ele.place_name }}</option>
+                                    {% endfor %}
+                                    <input type="hidden" id="wpqkf" name="" value="">
+                                </select>
+                            </form>
+                        </div>
+                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                        <script>
+                            const allData = [
+                                {% for ele in h_place %}
+                                { place_name: '{{ ele.place_name }}', score_rate: {{ ele.score_rate }}, review_num: {{ ele.review_num }}, place_address: '{{ ele.place_address }}', phone_num: '{{ ele.phone_num }}' },
+                                {% endfor %}
+                            ];
+        
+                            let selectedPlace = allData[0].place_name; // 드롭다운 초기 선택값
+                            const placeSelect = document.getElementById('place_select');
+                            placeSelect.value = selectedPlace; // 드롭다운에서 초기값이 로딩할때 선택되도록
+                            const chart1 = createChart('star_rate', 'doughnut');
+                            const chart2 = createChart('review_num1', 'bar');
+                            const chart3 = createChart('review_num2', 'bar');
+        
+                            function createChart(canvasId, chartType) {
+                                const ctx = document.getElementById(canvasId).getContext('2d');
+                                const chartOptions = {
+                                    type: chartType,
+                                    data: {},
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                ticks: {
+                                                    stepSize: 100
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+                                return new Chart(ctx, chartOptions);
+                            }
+        
+                            function updateChart() {
+                                const filteredData = allData.filter(data => data.place_name === selectedPlace);
+                                const placeName = filteredData[0].place_name;
+                                const scoreRate = filteredData[0].score_rate;
+                                const reviewNum = filteredData[0].review_num;
+                                const maxScore = 5;
+        
+                                // Update star rate chart
+                                const starRateData = {
+                                    labels: [placeName],
+                                    datasets: [{
+                                        data: [scoreRate, maxScore - scoreRate],
+                                        backgroundColor: [
+                                            'rgb(255, 99, 132)',
+                                            'rgb(54, 162, 235)'
+                                        ],
+                                        hoverOffset: 4
+                                    }]
+                                };
+                                chart1.data = starRateData;
+                                chart1.update();
+        
+                                // Update review num chart 1
+                                const reviewNumData1 = {
+                                    labels: [placeName],
+                                    datasets: [{
+                                        label: '리뷰갯수',
+                                        data: [reviewNum],
+                                        backgroundColor: 'rgb(255, 99, 132)',
+                                        hoverOffset: 4
+                                    }]
+                                };
+                                chart2.data = reviewNumData1;
+                                chart2.options.scales.y.max = reviewNum;
+                                chart2.update();
+        
+                                // Update review num chart 2
+                                const averageReviewNum = calculateAverageReviewNum();
+                                const reviewNumData2 = {
+                                    labels: ['평균 리뷰갯수'],
+                                    datasets: [{
+                                        label: '평균 리뷰갯수',
+                                        data: [averageReviewNum],
+                                        backgroundColor: 'rgb(54, 162, 235)',
+                                        hoverOffset: 4
+                                    }]
+                                };
+                                chart3.data = reviewNumData2;
+                                chart3.options.scales.y.max = Math.max(reviewNum, averageReviewNum);
+                                chart3.update();
+                            }
+        
+                            function calculateAverageReviewNum() {
+                                let totalReviewNum = 0;
+                                for (let i = 0; i < allData.length; i++) {
+                                    totalReviewNum += allData[i].review_num;
+                                }
+                                const averageReviewNum = totalReviewNum / allData.length;
+                                return Math.round(averageReviewNum);
+                            }
+
+                            function handlePlaceSelection() {
+                                selectedPlace = placeSelect.value;
+                                selectedPlace = placeSelect.options[placeSelect.selectedIndex].value;
+                                console.log(selectedPlace)
+                                updateChart();
+                                displayPlaceInfo();
+
+
+                                $.ajax({
+			
+                                    url : "{% url 'post' %}",		
+                                    type : "POST",
+                                    //contentType : "application/json",
+                                    data : {
+                                        "selectedPlace": selectedPlace,
+                                        "csrfmiddlewaretoken": '{{ csrf_token }}'
+                                    },
+                                    headers: { "X-CSRFToken": "{{ csrf_token }}"
+                                    },
+                                    dataType : "JSON",
+                                    success: function(resData) {
+                                        // 성공적으로 데이터를 받아온 경우 실행됩니다.
+                                       console.log(resData)
+                                       console.log("성공")
+                                       console.log(resData[0])
+                                       let parent = document.querySelector("#sample_frm");
+                                       let childElement = null;
+                                       
+                                       for (let i = 0; i < resData.length; i++){
+                                        childElement = document.createElement("button");
+                                        childElement.className = "sampleBtn" + i + " btn btn-outline-primary col-lg-12 mb-4";
+                                        childElement.type = "submit";
+                                        var text = document.createTextNode(resData[i].review_detail);
+                                        
+                                        console.log(resData[i].review_detail);
+                                        parent.append(childElement);
+                                        childElement.append(text);
+                                        
+                                       }
+                                    //    ("#sample_frm").empty() 
+                                       var buttons = document.querySelectorAll('button');
+
+                                       // 버튼의 클릭 이벤트를 핸들러로 등록합니다.
+                                       buttons.forEach(button => {
+                                       button.addEventListener('click', (e) => {
+                                           // 현재 클릭한 버튼의 텍스트를 출력합니다.
+                                           e.preventDefault();
+                                           console.log(button.textContent);
+                                           let data = button.textContent
+                                           fetch("http://192.168.0.68:8000/restaurant/selapi/", {
+                                                method: "POST",
+                                                body: JSON.stringify({
+                                                    data: data
+                                                }),
+                                                })
+                                                .then((response) => response.json())
+                                                .then((result) => {console.log(result[0])
+                                                    let parent = document.querySelector(".good_bad");
+                                                    let childElement = null;
+                                                    let video = document.querySelector("#video");
+                                                    console.log(video);
+                                                    childElement = document.createElement("img");
+                                                    parent.append(childElement);
+                                                    if(result[0] == "부정"){
+                                                        console.log("부정");
+                                                        let parent = document.querySelector(".good_bad");
+                                                        let childElement = document.querySelector("img");
+                                                        let video = document.querySelector("#video");
+                                                        
+                                                        video.setAttribute("style", "opacity: 0;")
+                                                        // childElement = document.createElement("img");
+                                                        childElement.setAttribute("src", "http://192.168.0.68:8000/static/images/badswitch.png");
+                                                        // parent.append(childElement);
+                                                        
+                                                    } else if (result[0]=="긍정"){
+                                                        console.log("긍정");
+                                                        let parent = document.querySelector(".good_bad");
+                                                        let childElement = document.querySelector("img");
+                                                        let video = document.querySelector("#video");
+                                                        video.setAttribute("class", "hidden");
+                                                        // childElement = document.createElement("img");
+                                                        childElement.setAttribute("src", "http://192.168.0.68:8000/static/images/goodswitch.png");
+                                                        // parent.append(childElement);
+                                                    }
+                                                });
+                                       });
+                                       });
+                                    },
+                                    error : function(XHR, status, error) {
+                                        console.log("실패")
+                                        console.error(status + " : " + error);
+                                    }
+                                });
+
+
+                            }
+                        
+                            
+
+                            function displayPlaceInfo() {
+                                const filteredData = allData.filter(data => data.place_name === selectedPlace);
+                                const placeAddress = filteredData[0].place_address;
+                                const phoneNum = filteredData[0].phone_num;
+                                const cardBody = document.getElementById('place_info');
+                                cardBody.innerHTML = `${placeAddress}<br><br><br><br><br>${phoneNum}<br>`;
+                            }
+        
+                            updateChart();
+                        </script>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Pie Chart -->
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">음식점 정보</h6>
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                aria-labelledby="dropdownMenuLink">
+                                <div class="dropdown-header">Dropdown Header:</div>
+                                <a class="dropdown-item" href="#">Action</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body" id="place_info">
+                        <div>주소 및 음식점 대표전화번호</div>
+                        <!-- Place info will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        
+        <!-- Content Row -->
+        <!-- 식당주소 / 번호 -->
+        <div class="row">
+
+            <!-- Earnings (Monthly) Card Example -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    제주 총 음식점 수</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">21,694개</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earnings (Monthly) Card Example -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    제주 카페 수</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">2061개</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        <!-- Content Row -->
+        <div class="row">
+
+            <!-- Content Column -->
+            <div class="col-12 mb-4">
+            
+                <!-- Project Card Example -->
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Projects</h6>
+                    </div>
+                    <div class="card-body good_bad">
+                        <h4 class="small font-weight-bold">Server Migration <span class="float-right">20%</span></h4>
+                        <video id="video" class="" loop="loop" playsinline="" autoplay muted="muted" src="/static/images/rating_7.mp4"
+                            ></video>
+                    </div>
+                </div>
+            </div>
+
+                <!-- Color System -->
+                <div class="row ">
+                    <div class="col-lg-6 mb-4">
+                        <form action="" id="sample_frm" method="post">
+                            {% csrf_token %}
+                        <form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- <div class="col-lg-6 mb-4"> -->
+
+                <!-- Illustrations -->
+                <!-- <div class="card shadow mb-4"> -->
+                    <!-- <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">리뷰 미리보기</h6>
+                    </div> -->
+                    <!-- <div class="card-body">
+                        {% for ele in p_review|slice:":5" %}
+                            {{ ele.placeName }}<span>/&nbsp;&nbsp;<span>
+                            {{ ele.review_detail }}<br><br>
+                        {% endfor %}
+                    </div> -->
+                <!-- </div> -->
+
+                <!-- Approach -->
+                <!-- <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Development Approach</h6>
+                    </div>
+                    <div class="card-body">
+                        <p>SB Admin 2 makes extensive use of Bootstrap 4 utility classes in order to reduce
+                            CSS bloat and poor page performance. Custom CSS classes are used to create
+                            custom components and custom utility classes.</p>
+                        <p class="mb-0">Before working with this theme, you should become familiar with the
+                            Bootstrap framework, especially the utility classes.</p>
+                    </div>
+                </div> -->
+
+            <!-- </div> -->
+        </div>
+
+    </div>
+    <!-- /.container-fluid -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- <script>
+        const video = document.querySelector("#video")
+    
+        $("body").on("mouseover mousemove mouseenter", function () {
+            video.muted = true;
+            video.play();
+            video.muted = false;
+        });
+    </script> -->
+</body>
+</html>
+

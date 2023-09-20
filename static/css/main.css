@@ -1,0 +1,186 @@
+body {
+  /* background-color: #F1F1F4; */
+  min-height: 200vh;
+  -ms-overflow-style: none;
+  position: relative;
+}
+
+body::after {
+  content: '';
+  /* background-image: url("/static/images/cristian-palmer-3leBubkp5hk-unsplash.jpg"); */
+  /* background-image: url("/static/images/mathilde-normandeau-KDoUhubaX2g-unsplash.jpg"); */
+  /* background-image: url("/static/images/sime-basioli-BRkikoNP0KQ-unsplash.jpg"); */
+  background-image: url("/static/images/silas-baisch-K785Da4A_JA-unsplash.jpg");
+  opacity: 0.2;
+  background-size: cover;
+  display: block;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: -1;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-image {
+  display: flex;
+  position: fixed;
+  top: 25%;
+  /* left: 50%; */
+  /* margin-top: -50px; */
+  /* margin-left: -50px; */
+}
+
+.scroll-image img.one {
+  /* width: calc(33.333% - 10px);
+  height: calc(var(--100vh) * 3); */
+  size: cover;
+  width: 768px;
+  margin: 0 15px 146px 0;
+  margin-top: 160px;
+  position: absolute;
+  right: -2000px;
+  animation: rotate 1s linear infinite;
+  animation-play-state: paused;
+  animation-delay: calc(var(--scroll) * -0.2s);
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+  padding-bottom: 147px;
+  transform: rotate(-5deg);
+
+  -webkit-mask-image: url(/static/images/slide.png);
+  mask-image: url(/static/images/slide.png);
+  -webkit-mask-size: 768px;
+}
+
+.scroll-image img.one:hover {
+  width: 768px;
+  margin: 0 15px 146px 0;
+  margin-top: 160px;
+  position: absolute;
+  right: -2000px;
+  animation: rotate 1s linear infinite;
+  animation-play-state: paused;
+  animation-delay: calc(var(--scroll) * -0.2s);
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+  padding-bottom: 147px;
+  transform: rotate(-5deg);
+  
+  -webkit-mask-image: url(/static/images/weather_2.png);
+  mask-image: url(/static/images/weather_2.png);
+  /* transition-duration: 1s; */
+  -webkit-mask-size: 768px;
+
+}
+
+.scroll-image img.two {
+  width: 768px;
+  margin: 0 15px 15px 0;
+  margin-top: 95px;
+  position: absolute;
+  right: -2800px;
+  size: cover;
+  animation: rotate 1s linear infinite;
+  animation-play-state: paused;
+  animation-delay: calc(var(--scroll) * -0.2s);
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+  transform: rotate(-5deg);
+
+  -webkit-mask-image: url(/static/images/slide.png);
+  mask-image: url(/static/images/slide.png);
+  -webkit-mask-size: 768px;
+}
+
+.scroll-image img.two:hover {
+  width: 768px;
+  margin: 0 15px 15px 0;
+  margin-top: 95px;
+  position: absolute;
+  right: -2800px;
+  size: cover;
+  animation: rotate 1s linear infinite;
+  animation-play-state: paused;
+  animation-delay: calc(var(--scroll) * -0.2s);
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+  transform: rotate(-5deg);
+  
+  -webkit-mask-image: url(/static/images/hotspot_1.png);
+  mask-image: url(/static/images/hotspot_1.png);
+  /* transition-duration: 1s; */
+  -webkit-mask-size: 768px;
+}
+
+.scroll-image img.three {
+  width: 768px;
+  margin: 0 15px 15px 0;
+  margin-top: 22px;
+  position: absolute;
+  right: -3600px;
+  animation: rotate 1s linear infinite;
+  animation-play-state: paused;
+  animation-delay: calc(var(--scroll) * -0.2s);
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+  transform: rotate(-5deg);
+
+  -webkit-mask-image: url(/static/images/slide.png);
+  mask-image: url(/static/images/slide.png);
+  -webkit-mask-size: 768px;
+}
+
+.scroll-image img.three:hover {
+  width: 768px;
+  margin: 0 15px 15px 0;
+  margin-top: 22px;
+  position: absolute;
+  right: -3600px;
+  animation: rotate 1s linear infinite;
+  animation-play-state: paused;
+  animation-delay: calc(var(--scroll) * -0.2s);
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+  transform: rotate(-5deg);
+  
+  -webkit-mask-image: url(/static/images/hostel_200.png);
+  mask-image: url(/static/images/hostel_200.png);
+  /* transition-duration: 1s; */
+  -webkit-mask-size: 768px;
+}
+
+.scroll-image.hidden {
+  width: 1200px;
+  height: 720px;
+  margin: 0 15px 15px 0;
+  margin-top: 225px;
+
+  visibility: hidden;
+  left: -1500px;
+
+  animation: rotate 1s linear infinite;
+  animation-play-state: paused;
+  animation-delay: calc(var(--scroll) * -1s);
+
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+
+}
+
+.scroll-image img:nth-of-type(3n),
+.scroll-image img:last-child {
+  margin-right: 0;
+}
+
+@keyframes rotate {
+  to {
+    margin-top: 75px;
+    transform: translateX(-2000%);
+  }
+}
+

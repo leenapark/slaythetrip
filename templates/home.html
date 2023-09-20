@@ -1,0 +1,41 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="/static/css/home.css">
+
+  <title>
+  </title>
+</head>
+
+<body>
+    <div class="content">
+      <a class="hc vc" id="cm" href="/main/">
+        <video id="video" loop="loop" playsinline="" muted="muted" src="/static/images/Comp 1_4.mp4"
+          data-v-0d7e6c33="">
+        </video>
+      </a>
+    </div>
+  </body>
+  
+  </html>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script>
+    const video = document.querySelector("#video")
+
+    $("body").on("mouseover mousemove mouseenter", function(){
+        video.muted = true;
+        video.play();
+        video.muted = false;
+    });
+
+
+  </script>
+  <script src="{% static 'js/home.js' %}"></script>
